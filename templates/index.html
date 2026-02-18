@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARTeacher - Generador de Informe Web</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #007bff;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #777;
+            font-size: 0.9em;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .moodle-instruction {
+            border: 1px solid #cce5ff;
+            background-color: #e6f5ff;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .moodle-instruction p {
+            font-weight: bold;
+            color: #004085;
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+        }
+
+        .moodle-screenshot {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        fieldset {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+
+        legend {
+            font-weight: bold;
+            color: #333;
+            padding: 0 10px;
+            font-size: 1.1em;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        input[type="text"],
+        input[type="file"],
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        input[type="file"] {
+            padding: 5px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        /* Estilo para resaltar la selección de parcial */
+        .parcial-box {
+            background-color: #f0f7ff;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 5px solid #007bff;
+            margin-bottom: 20px;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1.1em;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        .credit {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.9em;
+            color: #999;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>ARTeacher - Generador de Informe Web 🌐</h1>
+        <p class="subtitle">Creado por Arturo Rodríguez, PhD.</p>
+
+        <div class="moodle-instruction">
+            <p>💡 **IMPORTANTE:** Para generar el informe, descarga el archivo de calificaciones usando la opción
+                **"Exportar como Hoja de cálculo Excel"** desde la pestaña Calificaciones de Moodle.</p>
+            <img src="/static/que.jpg" alt="Instrucción de descarga de calificaciones de Moodle"
+                class="moodle-screenshot">
+        </div>
+
+        {% if error %}
+        <div class="error">
+            <p>🚨 **Error:** {{ error }}</p>
+            <p>Por favor, revisa los campos y el archivo.</p>
+        </div>
+        {% endif %}
+
+        <form action="/generate_report" method="post" enctype="multipart/form-data">
+
+            <fieldset>
+                <legend>1. Datos Generales (Informe/Destinatario)</legend>
+
+                <div class="parcial-box">
+                    <label for="parcial_seleccionado" style="color: #0056b3; font-weight: bold;">📍 Seleccione el Parcial a reportar:</label>
+                    <select id="parcial_seleccionado" name="parcial_seleccionado" required>
+                        <option value="1" {% if data and data.parcial_seleccionado == '1' %}selected{% endif %}>PRIMER PARCIAL (Nota < 7.00)</option>
+                        <option value="2" {% if data and data.parcial_seleccionado == '2' %}selected{% endif %}>SEGUNDO PARCIAL (Nota < 14.00)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="fecha">Fecha (ej: Manta, 21 de Nov...):</label>
+                    <input type="text" id="fecha" name="fecha" required value="{{ data.fecha if data else '' }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="titulo_academico_destinatario">Título Subdecano/a (ej: Mg.):</label>
+                    <input type="text" id="titulo_academico_destinatario" name="titulo_academico_destinatario" required
+                        value="{{ data.titulo_academico_destinatario if data else '' }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="nombres_apellidos_destinatario">Nombres y Apellidos Subdecano/a:</label>
+                    <input type="text" id="nombres_apellidos_destinatario" name="nombres_apellidos_destinatario"
+                        required value="{{ data.nombres_apellidos_destinatario if data else '' }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="facultad_extension_destinatario">Nombre de la Facultad/Extensión:</label>
+                    <input type="text" id="facultad_extension_destinatario" name="facultad_extension_destinatario"
+                        required value="{{ data.facultad_extension_destinatario if data else '' }}">
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>2. Datos del Docente (Emisor)</legend>
+                <div class="form-group">
+                    <label for="titulo_academico_emisor">Tu Título (Firma) (ej: Dr.):</label>
+                    <input type="text" id="titulo_academico_emisor" name="titulo_academico_emisor" required
+                        value="{{ data.titulo_academico_emisor if data else '' }}">
+                </div>
+                <div class="form-group">
+                    <label for="nombres_apellidos_emisor">Tus Nombres y Apellidos (Firma):</label>
+                    <input type="text" id="nombres_apellidos_emisor" name="nombres_apellidos_emisor" required
+                        value="{{ data.nombres_apellidos_emisor if data else '' }}">
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>3. Datos Director(a) de Carrera (cc.)</legend>
+                <div class="form-group">
+                    <label for="titulo_academico_cc">Título Director/a (cc.):</label>
+                    <input type="text" id="titulo_academico_cc" name="titulo_academico_cc" required
+                        value="{{ data.titulo_academico_cc if data else '' }}">
+                </div>
+                <div class="form-group">
+                    <label for="nombres_apellidos_cc">Nombres y Apellidos Director/a (cc.):</label>
+                    <input type="text" id="nombres_apellidos_cc" name="nombres_apellidos_cc" required
+                        value="{{ data.nombres_apellidos_cc if data else '' }}">
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>4. Archivo de Calificaciones (.xlsx)</legend>
+                <div class="form-group">
+                    <label for="excel_file">Selecciona el archivo Excel (.xlsx):</label>
+                    <input type="file" id="excel_file" name="excel_file" accept=".xlsx" required>
+                    <small>El nombre de la asignatura se extraerá del nombre del archivo (usando '--').</small>
+                </div>
+            </fieldset>
+
+            <button type="submit">🚀 GENERAR INFORME Y DESCARGAR</button>
+        </form>
+
+        <div class="credit">
+            <p>Programa Desarrollado por **Dr. Arturo Rodriguez (ARTeacher)** - Adaptado a Web con Flask</p>
+        </div>
+    </div>
+</body>
+
+</html>
