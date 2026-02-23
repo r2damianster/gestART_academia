@@ -1,0 +1,170 @@
+/* ===========================
+   CONFIGURACIÓN GENERAL
+=========================== */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f7f6;
+    display: flex;
+}
+
+/* ===========================
+   BARRA LATERAL
+=========================== */
+.sidebar {
+    width: 250px;
+    background-color: #1e293b;
+    color: white;
+    height: 100vh;
+    padding-top: 20px;
+    position: fixed;
+}
+
+.sidebar h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.sidebar button {
+    display: block;
+    width: 90%;
+    margin: 10px auto;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    background-color: #334155;
+    color: white;
+    cursor: pointer;
+    text-align: left;
+    font-size: 0.95em;
+    transition: all 0.3s ease;
+}
+
+.sidebar button:hover {
+    background-color: #475569;
+}
+
+/* ===========================
+   CONTENIDO PRINCIPAL
+=========================== */
+.main-content {
+    margin-left: 250px;
+    padding: 30px;
+    width: 100%;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.hidden {
+    display: none;
+}
+
+h1 {
+    color: #007bff;
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+/* ===========================
+   FORMULARIO
+=========================== */
+fieldset {
+    border: 1px solid #ccc;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+}
+
+legend {
+    font-weight: bold;
+    padding: 0 5px;
+    color: #334155;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 0.9em;
+    font-weight: 600;
+}
+
+input[type="text"],
+input[type="file"],
+select,
+textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 12px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 0.9em;
+    box-sizing: border-box; /* Crucial para que no se salga del contenedor */
+}
+
+/* Textarea moldeable y grande */
+.textarea-flexible {
+    min-height: 150px; /* Altura inicial generosa */
+    resize: vertical;  /* Permite al usuario estirarlo hacia abajo */
+    line-height: 1.5;
+    font-family: inherit;
+}
+
+/* Selector múltiple */
+select[multiple] {
+    height: 150px;
+    background-color: white;
+}
+
+select[multiple] option {
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+.help-text {
+    color: #666;
+    display: block;
+    margin-top: -8px;
+    margin-bottom: 15px;
+    font-size: 0.85em;
+}
+
+button.submit-btn {
+    background-color: #28a745;
+    color: white;
+    padding: 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 1em;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+button.submit-btn:hover {
+    background-color: #218838;
+}
+
+
+/* Ajuste para inputs de fecha y hora */
+input[type="date"],
+input[type="time"] {
+    cursor: pointer;
+    background-color: #fff;
+    text-transform: uppercase; /* Para que se vea más ordenado */
+    font-family: 'Segoe UI', sans-serif;
+}
+
+input[type="date"]:hover,
+input[type="time"]:hover {
+    border-color: #007bff;
+}
