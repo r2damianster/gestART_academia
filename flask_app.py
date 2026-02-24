@@ -1,14 +1,60 @@
 import os
+import io
+import zipfile
+from datetime import datetime
 from flask import Flask, render_template, request, send_file
 from logic.convocatorias import ConvocatoriaLogic
 
+# Importación de tus generadores de PAT
+from logic.PATS.Pat03 import generar_documento_pat03
+from logic.PATS.Pat04 import generar_documento_pat04
+from logic.PATS.Pat05 import generar_documento_pat05
+from logic.PATS.Pat06 import generar_documento_pat06
+
 app = Flask(__name__)
 
-# Configuración de carpetas
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+# --- CONFIGURACIÓN Y DATOS MAESTRÍAS ---
+
+info_maestrias = {
+    "1": {
+        "nombre": "Maestría en Educación con Mención en Lingüística y Literatura, Cohorte IV – Matriz Manta.",
+        "responsable": "Mg.\nVargas Parraga Vanessa Monserrate"
+    },
+    "2": {
+        "nombre": "Maestría en Educación con Mención en Innovaciones Pedagógicas, Cohorte IV – sede Matriz.",
+        "responsable": "Mg.\nDelgado Mero Diana Maria"
+    },
+    "3": {
+        "nombre": "Maestría en Pedagogía de los Idiomas Nacionales y Extranjeros Mención Inglés Matriz Manta, Cohorte III.",
+        "responsable": "Mg.\nBazurto Alcivar Gabriel José"
+    }
+}
+
+temas_map = {
+    "1": [ # REVISIÓN SISTEMÁTICA
+        "Socialización de los PAT (003- 006)", "Selección de revista a publicar",
+        "Delimitación del tema del trabajo de titulación", "Formulación del problema",
+        "Diseño del protocolo de revisión", "Búsqueda sistemática de literatura",
+        "Análisis y categorización temática", "Redacción del marco teórico",
+        "Elaboración de discusión académica"
+    ],
+    "2": [ # NO EXPERIMENTAL
+        "Socialización de los procesos de titulación (PAT)", "Planteamiento del problema",
+        "Justificación, objetivos y viabilidad", "Construcción del marco referencial",
+        "Definición y operativización de variables", "Diseño metodológico",
+        "Identificación de población y muestra", "Diseño y validación de instrumentos",
+        "Planificación del análisis de resultados"
+    ],
+    "3": [ # CUASI-EXPERIMENTAL
+        "Socialización de normativas y formatos PAT", "Planteamiento de hipótesis",
+        "Revisión de antecedentes y bases teóricas", "Diseño del plan de intervención",
+        "Selección de grupos (Experimental/Control)", "Diseño y pilotaje de instrumentos",
+        "Implementación de la intervención", "Aplicación de Pre-test y Post-test",
+        "Análisis comparativo de datos"
+    ]
+}
+
+# --- RUTAS ---
 
 @app.route('/')
 def index():
@@ -19,7 +65,6 @@ def convocatoria_estudiante():
     try:
         cursos_seleccionados = request.form.getlist('cursos')
         cursos_str = ", ".join(cursos_seleccionados)
-
         sigla_fija = "PINE"
 
         datos = {
@@ -29,10 +74,7 @@ def convocatoria_estudiante():
             'ciudad': request.form.get('ciudad'),
             'fecha_larga': request.form.get('fecha_larga'),
             'asunto': request.form.get('asunto'),
-            # --- CORRECCIÓN AQUÍ ---
-            'curso': cursos_str,   # Añadimos 'curso' para que reemplace {{CURSO}}
-            'cursos': cursos_str,  # Mantenemos 'cursos' por si acaso
-            # -----------------------
+            'curso': cursos_str,
             'descripcion_convocatoria': request.form.get('descripcion_convocatoria'),
             'fecha_reunion': request.form.get('fecha_reunion'),
             'hora_reunion': request.form.get('hora_reunion'),
@@ -44,9 +86,7 @@ def convocatoria_estudiante():
         }
 
         archivos = request.files.getlist('excel_files')
-
         logic = ConvocatoriaLogic()
-        # Aquí 'excel_files' es el nombre del argumento en logic/convocatorias.py
         buffer = logic.generar_docx("estudiante", datos, excel_files=archivos)
 
         return send_file(
@@ -57,53 +97,33 @@ def convocatoria_estudiante():
         )
     except Exception as e:
         return f"Error: {str(e)}", 500
-    
 
 @app.route('/convocatoria_docente', methods=['POST'])
 def convocatoria_docente():
     try:
-        # 1. Definimos la sigla fija de la carrera
         sigla_fija = "PINE"
-        
-        # 2. Recogemos los datos del formulario
         num = request.form.get('num_convocatoria')
-        periodo = request.form.get('periodo')
-        ciudad = request.form.get('ciudad')
-        fecha_l = request.form.get('fecha_larga')
-        asunto = request.form.get('asunto')
-        desc = request.form.get('descripcion_convocatoria')
-        f_reu = request.form.get('fecha_reunion')
-        h_reu = request.form.get('hora_reunion')
-        l_reu = request.form.get('lugar_reunion')
-        tit = request.form.get('convocante_titulo')
-        nom = request.form.get('convocante_nombre')
-        car = request.form.get('convocante_cargo')
-        ini = request.form.get('iniciales_elaborador')
-
-        # 3. Diccionario unificado (la lógica se encarga de las llaves {{}})
-        # Nota: Ya no necesitamos pasar 'siglas_convocante' desde el form, usamos sigla_fija
+        
         datos = {
-            'num_convocatoria': num, 'NUM_CONVOCATORIA': num,
-            'periodo': periodo, 'PERIODO': periodo,
-            'siglas_convocante': sigla_fija, 'SIGLAS_CONVOCANTE': sigla_fija,
-            'ciudad': ciudad, 'CIUDAD': ciudad,
-            'fecha_larga': fecha_l, 'FECHA_LARGA': fecha_l,
-            'asunto': asunto, 'ASUNTO': asunto,
-            'descripcion_convocatoria': desc, 'DESCRIPCION_CONVOCATORIA': desc,
-            'fecha_reunion': f_reu, 'FECHA_REUNION': f_reu,
-            'hora_reunion': h_reu, 'HORA_REUNION': h_reu,
-            'lugar_reunion': l_reu, 'LUGAR_REUNION': l_reu,
-            'convocante_titulo': tit, 'CONVOCANTE_TITULO': tit,
-            'convocante_nombre': nom, 'CONVOCANTE_NOMBRE': nom,
-            'convocante_cargo': car, 'CONVOCANTE_CARGO': car,
-            'iniciales_elaborador': ini, 'INICIALES_ELABORADOR': ini
+            'num_convocatoria': num,
+            'periodo': request.form.get('periodo'),
+            'siglas_convocante': sigla_fija,
+            'ciudad': request.form.get('ciudad'),
+            'fecha_larga': request.form.get('fecha_larga'),
+            'asunto': request.form.get('asunto'),
+            'descripcion_convocatoria': request.form.get('descripcion_convocatoria'),
+            'fecha_reunion': request.form.get('fecha_reunion'),
+            'hora_reunion': request.form.get('hora_reunion'),
+            'lugar_reunion': request.form.get('lugar_reunion'),
+            'convocante_titulo': request.form.get('convocante_titulo'),
+            'convocante_nombre': request.form.get('convocante_nombre'),
+            'convocante_cargo': request.form.get('convocante_cargo'),
+            'iniciales_elaborador': request.form.get('iniciales_elaborador')
         }
 
-        # 4. Llamada a la lógica
         logic = ConvocatoriaLogic()
         buffer = logic.generar_docx("docente", datos)
 
-        # 5. Retorno del archivo corregido
         return send_file(
             buffer,
             as_attachment=True,
@@ -111,14 +131,64 @@ def convocatoria_docente():
             mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
         )
     except Exception as e:
-        return f"Error en el servidor: {str(e)}", 500
+        return f"Error: {str(e)}", 500
+
+@app.route('/generar_pat_zip', methods=['POST'])
+def generar_pat_zip():
+    try:
+        m_op = request.form.get('maestria_opcion')
+        metod_op = request.form.get('metodologia_opcion')
+        
+        # Procesamiento de fechas
+        fecha_s = request.form.get('fecha_sesion')
+        fecha_d = request.form.get('fecha_designacion')
+        
+        # Formateamos para que la lógica lo entienda
+        fecha_final_obj = datetime.strptime(fecha_s, '%Y-%m-%d')
+        fecha_desig_str = datetime.strptime(fecha_d, '%Y-%m-%d').strftime('%d/%m/%Y')
+
+        datos = {
+            "MAESTRIA": info_maestrias[m_op]["nombre"],
+            "responsable": info_maestrias[m_op]["responsable"],
+            "temas": temas_map[metod_op],
+            "nombre": request.form.get('nombre_maestrante'),
+            "articulo": request.form.get('titulo_articulo'),
+            "oficio": request.form.get('num_oficio'),
+            "fecha_final": fecha_final_obj,
+            "fecha_designacion": fecha_desig_str,
+            "hora": request.form.get('hora_inicio')
+        }
+
+        # Crear el ZIP en memoria
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            # Lista de funciones y sus nombres de archivo
+            pats = [
+                (generar_documento_pat03(datos), "PAT_003_Cronograma.docx"),
+                (generar_documento_pat04(datos), "PAT_004_Oficio.docx"),
+                (generar_documento_pat05(datos), "PAT_005_Asistencia.docx"),
+                (generar_documento_pat06(datos), "PAT_006_Informe.docx"),
+            ]
+            
+            for buffer, name in pats:
+                if buffer:
+                    zip_file.writestr(name, buffer.getvalue())
+
+        zip_buffer.seek(0)
+        return send_file(
+            zip_buffer,
+            mimetype='application/zip',
+            as_attachment=True,
+            download_name=f"PAT_{datos['nombre'].replace(' ', '_')}.zip"
+        )
+    except Exception as e:
+        return f"Error en Maestría: {str(e)}", 500
 
 @app.route('/generate_report', methods=['POST'])
 def generate_report():
-    # Aquí iría la lógica que ya tienes para el informe de notas promedios menores
-    # Por ahora, un placeholder para que no rompa el server
-    return "Funcionalidad de Informe en desarrollo o integrada aquí.", 200
+    return "Funcionalidad de Informe de Notas en desarrollo.", 200
 
+# --- INICIO DEL SERVIDOR ---
 if __name__ == '__main__':
-    print("Iniciando servidor Flask en http://127.0.0.1:5000")
-    app.run(debug=True)
+    # El servidor debe arrancar DESPUÉS de definir todas las rutas
+    app.run(debug=True, port=5000)

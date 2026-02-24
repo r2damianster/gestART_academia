@@ -15,6 +15,20 @@
     <button onclick="mostrarSeccion('informe')">
         📊 Informe Notas Promedios Menores
     </button>
+    
+    <button onclick="toggleSubmenuMaestria()">
+    🎓 Tutorías Maestría ▾
+    </button>
+
+    <div id="submenu-maestria" class="hidden" style="margin-left:15px;">
+        <button onclick="mostrarSeccion('reportes-maestria')">
+            📝 Reportes PAT
+        </button>
+</div>
+
+
+
+
 
     <button onclick="toggleSubmenu()">
         📘 Socialización de Procesos ▾
@@ -75,6 +89,58 @@
             </form>
         </div>
     </div>
+
+
+
+    <div id="reportes-maestria" class="hidden">
+        <div class="container">
+            <h1>Generación de Documentos PAT</h1>
+            <form action="/generar_pat_zip" method="post">
+                <fieldset>
+                    <legend>Programa y Tutor</legend>
+                    <label>Maestría:</label>
+                    <select name="maestria_opcion" required>
+                        <option value="1">Lingüística y Literatura</option>
+                        <option value="2">Innovaciones Pedagógicas</option>
+                        <option value="3">Pedagogía de Idiomas (Inglés)</option>
+                    </select>
+                    
+                    <label>Nombre del Maestrante:</label>
+                    <input type="text" name="nombre_maestrante" required>
+                    
+                    <label>Título del Trabajo/Tesis:</label>
+                    <input type="text" name="titulo_articulo" required>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Metodología (Temas)</legend>
+                    <select name="metodologia_opcion" required>
+                        <option value="1">Revisión Sistemática</option>
+                        <option value="2">No Experimental</option>
+                        <option value="3">Cuasi-Experimental</option>
+                    </select>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Logística y Fechas</legend>
+                    <label>N° Oficio recibido:</label>
+                    <input type="text" name="num_oficio" required>
+
+                    <label>Fecha Sesión 9:</label>
+                    <input type="date" name="fecha_sesion" required>
+
+                    <label>Fecha Designación Tutor:</label>
+                    <input type="date" name="fecha_designacion" required>
+
+                    <label>Hora de Inicio:</label>
+                    <input type="time" name="hora_inicio" value="16:00" required>
+                </fieldset>
+
+                <button type="submit" class="submit-btn">📦 Generar Paquete PAT (.zip)</button>
+            </form>
+        </div>
+    </div>
+    
 
     <div id="socializacion-estudiantes" class="hidden">
         <div class="container">
@@ -230,22 +296,41 @@
 </div>
 
 <script>
-    // 1. Control de navegación entre secciones
+    // 1. Control de navegación entre secciones (ACTUALIZADO)
     function mostrarSeccion(seccion) {
-        const secciones = ['informe', 'socializacion-estudiantes', 'socializacion-docentes'];
+        // Añadimos 'reportes-maestria' a la lista para que se oculte cuando cambies de pestaña
+        const secciones = [
+            'informe', 
+            'socializacion-estudiantes', 
+            'socializacion-docentes', 
+            'reportes-maestria'
+        ];
+        
         secciones.forEach(id => {
             const el = document.getElementById(id);
             if (el) el.classList.add('hidden');
         });
-        document.getElementById(seccion).classList.remove('hidden');
+
+        const seccionAMostrar = document.getElementById(seccion);
+        if (seccionAMostrar) {
+            seccionAMostrar.classList.remove('hidden');
+        }
     }
 
-    // 2. Control del menú desplegable lateral
+    // 2. Control del menú desplegable lateral (General)
     function toggleSubmenu() {
         document.getElementById('submenu-socializacion').classList.toggle('hidden');
     }
 
-    // 3. Conversión de fecha a formato largo (ej: 23 de febrero de 2026)
+    // 3. NUEVO: Control del menú desplegable de Maestría
+    function toggleSubmenuMaestria() {
+        const submenu = document.getElementById('submenu-maestria');
+        if (submenu) {
+            submenu.classList.toggle('hidden');
+        }
+    }
+
+    // 4. Conversión de fecha a formato largo
     function convertirFechaLarga(input, hiddenId) {
         if (!input.value) return;
         const partes = input.value.split('-');
@@ -254,48 +339,40 @@
         document.getElementById(hiddenId).value = fecha.toLocaleDateString('es-ES', opciones);
     }
 
-    // 4. Lógica para detectar múltiples cursos y mostrar advertencia
+    // 5. Lógica para detectar múltiples cursos
     document.addEventListener('DOMContentLoaded', function() {
         const selectCursos = document.getElementById('cursos-multiple');
         if (selectCursos) {
             selectCursos.addEventListener('change', function() {
                 const aviso = document.getElementById('aviso-cursos');
-                // Contamos cuántas opciones han sido seleccionadas
                 const seleccionados = Array.from(this.selectedOptions).length;
                 if (aviso) {
-                    // Si hay más de un curso, mostramos el aviso rojo
                     aviso.style.display = (seleccionados > 1) ? 'block' : 'none';
                 }
-                // Actualizamos la lista de archivos por si el usuario ya había subido algo
                 actualizarListaArchivos();
             });
         }
     });
 
-    // 5. Visualización de archivos seleccionados y validación de cantidad
+    // 6. Visualización de archivos seleccionados
     function actualizarListaArchivos() {
         const input = document.getElementById('excel_files');
         const display = document.getElementById('lista-archivos-seleccionados');
         const selectCursos = document.getElementById('cursos-multiple');
-        
-        // Obtenemos el número de cursos seleccionados en el formulario
         const numCursos = selectCursos ? Array.from(selectCursos.selectedOptions).length : 0;
 
-        if (input.files.length > 0) {
+        if (input && input.files.length > 0) {
             let html = `<strong>Archivos a procesar: ${input.files.length}</strong>`;
-            
-            // Si hay más cursos que archivos, lanzamos una alerta visual naranja
             if (numCursos > 0 && input.files.length < numCursos) {
                 html += ` <br><span style="color:#f0ad4e; font-size: 0.85em;">⚠️ Nota: Has elegido ${numCursos} cursos, pero solo subiste ${input.files.length} archivo(s).</span>`;
             }
-
             html += "<ul style='margin-top: 10px; list-style: none; padding-left: 0;'>";
             for (let i = 0; i < input.files.length; i++) {
                 html += "<li>✅ " + input.files[i].name + "</li>";
             }
             html += "</ul>";
             display.innerHTML = html;
-        } else {
+        } else if (display) {
             display.innerHTML = "<em>Ningún archivo seleccionado.</em>";
         }
     }
