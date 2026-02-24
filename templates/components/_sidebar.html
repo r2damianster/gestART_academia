@@ -1,0 +1,32 @@
+<div class="sidebar">
+    <h2>ARTeacher</h2>
+
+    <button onclick="mostrarSeccion('informe')">
+        📊 Informe Notas
+    </button>
+    
+    <button onclick="mostrarSeccion('acta-tecnica')">
+        🛠️ Acta Técnica
+    </button>
+
+    <button onclick="toggleSubmenuMaestria()">
+        🎓 Tutorías Maestría ▾
+    </button>
+    <div id="submenu-maestria" class="hidden" style="margin-left:15px;">
+        <button onclick="mostrarSeccion('reportes-maestria')">
+            📝 Reportes PAT
+        </button>
+    </div>
+
+    <button onclick="toggleSubmenu()">
+        📘 Socialización ▾
+    </button>
+    <div id="submenu-socializacion" class="hidden" style="margin-left:15px;">
+        <button onclick="mostrarSeccion('socializacion-estudiantes')">
+            👩‍🎓 Estudiantes
+        </button>
+        <button onclick="mostrarSeccion('socializacion-docentes')">
+            👨‍🏫 Docentes
+        </button>
+    </div>
+</div>

@@ -1,0 +1,50 @@
+<div class="container">
+    <h1>Generador de Informe</h1>
+    <form action="/generate_report" method="post" enctype="multipart/form-data">
+        <fieldset>
+            <legend>Configuración del Informe</legend>
+            <label>Parcial:</label>
+            <select name="parcial_seleccionado" required>
+                <option value="1">PRIMER PARCIAL (Nota < 7.00)</option>
+                <option value="2">SEGUNDO PARCIAL (Nota < 14.00)</option>
+            </select>
+
+            <label>Fecha del Informe:</label>
+            <input type="date" name="fecha" required>
+
+            <label>Facultad / Extensión:</label>
+            <input type="text" name="facultad_extension_destinatario" value="FACULTAD DE EDUCACIÓN, TURISMO, ARTES Y HUMANIDADES" required>
+        </fieldset>
+
+        <fieldset>
+            <legend>Destinatario y Emisor</legend>
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 10px;">
+                <label>Título Subdecano/a:</label><label>Nombres Subdecano/a:</label>
+                <input type="text" name="titulo_academico_destinatario" placeholder="Ej: Mg." required>
+                <input type="text" name="nombres_apellidos_destinatario" required>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 10px; margin-top: 10px;">
+                <label>Su Título (Docente):</label><label>Sus Nombres:</label>
+                <input type="text" name="titulo_academico_emisor" required>
+                <input type="text" name="nombres_apellidos_emisor" required>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Copia a (CC)</legend>
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 10px;">
+                <label>Título Director/a:</label><label>Nombres Director/a:</label>
+                <input type="text" name="titulo_academico_cc" placeholder="Ej: Mg." required>
+                <input type="text" name="nombres_apellidos_cc" required>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Archivo</legend>
+            <input type="file" name="excel_file" accept=".xlsx" required>
+        </fieldset>
+
+        <button type="submit" class="submit-btn">🚀 Generar Informe</button>
+    </form>
+</div>

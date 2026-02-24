@@ -1,0 +1,50 @@
+<div class="container">
+    <h1>Convocatoria a Docentes</h1>
+    <form action="/convocatoria_docente" method="post">
+        <fieldset>
+            <legend>Identificación</legend>
+            <label>N.º Convocatoria:</label>
+            <input type="text" name="num_convocatoria" placeholder="Ej: 001" required>
+            <label>Periodo:</label>
+            <select name="periodo" required>
+                <option value="" disabled selected>Seleccione...</option>
+                <option value="2026-1">2026-1</option>
+                <option value="2026-2">2026-2</option>
+            </select>
+            <input type="hidden" name="siglas_convocante" value="PINE">
+            <label>Ciudad:</label>
+            <input type="text" name="ciudad" value="Manta" required>
+        </fieldset>
+
+        <fieldset>
+            <legend>Datos de la Reunión</legend>
+            <label>Fecha de Emisión:</label>
+            <input type="date" onchange="convertirFechaLarga(this, 'fecha_larga_doc')" required>
+            <input type="hidden" name="fecha_larga" id="fecha_larga_doc">
+            <label>Asunto:</label>
+            <input type="text" name="asunto" required>
+            <label>Descripción:</label>
+            <textarea name="descripcion_convocatoria" class="textarea-flexible" required></textarea>
+        </fieldset>
+
+        <fieldset>
+            <legend>Logística</legend>
+            <label>Fecha del Evento:</label>
+            <input type="date" name="fecha_reunion" required>
+            <label>Hora:</label>
+            <input type="time" name="hora_reunion" required>
+            <label>Lugar:</label>
+            <input type="text" name="lugar_reunion" required>
+        </fieldset>
+
+        <fieldset>
+            <legend>Firma</legend>
+            <input type="text" name="convocante_titulo" placeholder="Título" required>
+            <input type="text" name="convocante_nombre" placeholder="Nombre" required>
+            <input type="text" name="convocante_cargo" placeholder="Cargo" required>
+            <input type="text" name="iniciales_elaborador" placeholder="Iniciales" required>
+        </fieldset>
+
+        <button type="submit" class="submit-btn">👨‍🏫 Generar Convocatoria Docentes</button>
+    </form>
+</div>

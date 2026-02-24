@@ -1,0 +1,79 @@
+<div class="container">
+    <h1>Convocatoria a Estudiantes</h1>
+    <form action="/convocatoria_estudiante" method="post" enctype="multipart/form-data">
+        <fieldset>
+            <legend>Identificación</legend>
+            <label>N.º Convocatoria:</label>
+            <input type="text" name="num_convocatoria" placeholder="Ej: 001" required>
+            
+            <label>Periodo Académico:</label>
+            <select name="periodo" required>
+                <option value="" disabled selected>Seleccione el periodo...</option>
+                <option value="2026-1">2026-1</option>
+                <option value="2026-2">2026-2</option>
+            </select>
+            <input type="hidden" name="siglas_convocante" value="PINE">
+        </fieldset>
+
+        <fieldset>
+            <legend>Datos del Evento</legend>
+            <label>Ciudad:</label>
+            <input type="text" name="ciudad" value="Manta" required>
+
+            <label>Fecha de Emisión (Calendario):</label>
+            <input type="date" id="date_picker_est" onchange="convertirFechaLarga(this, 'fecha_larga_est')" required>
+            <input type="hidden" name="fecha_larga" id="fecha_larga_est">
+
+            <label>Asunto:</label>
+            <input type="text" name="asunto" required>
+
+            <label>Cursos/Niveles:</label>
+            <select name="cursos" id="cursos-multiple" multiple required>
+                <option value="Primer Semestre 'A'">Primer Semestre 'A'</option>
+                <option value="Segundo Semestre 'A'">Segundo Semestre 'A'</option>
+                <option value="Tercer Semestre 'A'">Tercer Semestre 'A'</option>
+                <option value="Cuarto Semestre 'A'">Cuarto Semestre 'A'</option>
+                <option value="Cuarto Semestre 'B'">Cuarto Semestre 'B'</option>
+                <option value="Quinto Semestre 'A'">Quinto Semestre 'A'</option>
+                <option value="Sexto Semestre 'A'">Sexto Semestre 'A'</option>
+            </select>
+        </fieldset>
+
+        <fieldset>
+            <legend>Logística</legend>
+            <label>Descripción del motivo:</label>
+            <textarea name="descripcion_convocatoria" class="textarea-flexible" required></textarea>
+            <label>Fecha de Reunión:</label>
+            <input type="date" name="fecha_reunion" required>
+            <label>Hora:</label>
+            <input type="time" name="hora_reunion" required>
+            <label>Lugar:</label>
+            <input type="text" name="lugar_reunion" required>
+        </fieldset>
+
+        <fieldset>
+            <legend>Archivos Excel</legend>
+            <div id="aviso-cursos" style="color: #d9534f; font-weight: bold; margin-bottom: 10px; display: none;">
+                ⚠️ Suba los archivos de cada curso (Ctrl+Clic).
+            </div>
+            <input type="file" name="excel_files" id="excel_files" accept=".xls, .xlsx" multiple required onchange="actualizarListaArchivos()">
+            <div id="lista-archivos-seleccionados" class="file-list-preview" style="margin-top: 10px; padding: 10px; border: 1px dashed #ccc;">
+                <em>Ningún archivo seleccionado.</em>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Firmas</legend>
+            <label>Título:</label>
+            <input type="text" name="convocante_titulo" required>
+            <label>Nombre:</label>
+            <input type="text" name="convocante_nombre" required>
+            <label>Cargo:</label>
+            <input type="text" name="convocante_cargo" required>
+            <label>Sus Iniciales:</label>
+            <input type="text" name="iniciales_elaborador" required>
+        </fieldset>
+
+        <button type="submit" class="submit-btn">📄 Generar Convocatoria Unificada</button>
+    </form>
+</div>

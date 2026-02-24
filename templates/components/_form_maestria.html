@@ -1,0 +1,46 @@
+<div class="container">
+    <h1>Generación de Documentos PAT</h1>
+    <form action="/generar_pat_zip" method="post">
+        <fieldset>
+            <legend>Programa y Tutor</legend>
+            <label>Maestría:</label>
+            <select name="maestria_opcion" required>
+                <option value="1">Lingüística y Literatura</option>
+                <option value="2">Innovaciones Pedagógicas</option>
+                <option value="3">Pedagogía de Idiomas (Inglés)</option>
+            </select>
+            
+            <label>Nombre del Maestrante:</label>
+            <input type="text" name="nombre_maestrante" required>
+            
+            <label>Título del Trabajo/Tesis:</label>
+            <input type="text" name="titulo_articulo" required>
+        </fieldset>
+
+        <fieldset>
+            <legend>Metodología (Temas)</legend>
+            <select name="metodologia_opcion" required>
+                <option value="1">Revisión Sistemática</option>
+                <option value="2">No Experimental</option>
+                <option value="3">Cuasi-Experimental</option>
+            </select>
+        </fieldset>
+
+        <fieldset>
+            <legend>Logística y Fechas</legend>
+            <label>N° Oficio recibido:</label>
+            <input type="text" name="num_oficio" required>
+
+            <label>Fecha Sesión 9:</label>
+            <input type="date" name="fecha_sesion" required>
+
+            <label>Fecha Designación Tutor:</label>
+            <input type="date" name="fecha_designacion" required>
+
+            <label>Hora de Inicio:</label>
+            <input type="time" name="hora_inicio" value="16:00" required>
+        </fieldset>
+
+        <button type="submit" class="submit-btn">📦 Generar Paquete PAT (.zip)</button>
+    </form>
+</div>

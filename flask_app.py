@@ -4,6 +4,7 @@ import zipfile
 from datetime import datetime
 from flask import Flask, render_template, request, send_file
 from logic.convocatorias import ConvocatoriaLogic
+from logic.menor import ReportGeneratorLogic  # Añade esta línea al inicio
 
 # Importación de tus generadores de PAT
 from logic.PATS.Pat03 import generar_documento_pat03
@@ -186,7 +187,49 @@ def generar_pat_zip():
 
 @app.route('/generate_report', methods=['POST'])
 def generate_report():
-    return "Funcionalidad de Informe de Notas en desarrollo.", 200
+    try:
+        parcial_id = request.form.get('parcial_seleccionado')
+        excel_file = request.files.get('excel_file')
+        
+        if not excel_file:
+            return "No se subió ningún archivo", 400
+
+        # Mapeo completo de todos los campos del formulario
+        datos = {
+            "fecha": request.form.get('fecha'),
+            "titulo_academico_destinatario": request.form.get('titulo_academico_destinatario'),
+            "nombres_apellidos_destinatario": request.form.get('nombres_apellidos_destinatario'),
+            "facultad_extension_destinatario": request.form.get('facultad_extension_destinatario'),
+            "titulo_academico_emisor": request.form.get('titulo_academico_emisor'),
+            "nombres_apellidos_emisor": request.form.get('nombres_apellidos_emisor'),
+            "titulo_academico_cc": request.form.get('titulo_academico_cc'), # NUEVO
+            "nombres_apellidos_cc": request.form.get('nombres_apellidos_cc'), # NUEVO
+            "asignatura": "ASIGNATURA" 
+        }
+
+        logic = ReportGeneratorLogic()
+        
+        if excel_file.filename:
+            datos["asignatura"] = logic._extract_subject_from_filename(excel_file.filename)
+
+        estudiantes, info_parcial = logic.process_excel_data(excel_file, parcial_id)
+        buffer = logic.generate_report(datos, estudiantes, info_parcial)
+
+        return send_file(
+            buffer,
+            as_attachment=True,
+            download_name=f"Informe_Notas_Menores_{parcial_id}.docx",
+            mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        )
+
+    except Exception as e:
+        return f"Error en Informe: {str(e)}", 500
+
+@app.route('/generar_acta', methods=['POST'])
+def generar_acta():
+    # Aquí irá la lógica similar a las demás para llenar el Word
+    return "Funcionalidad de Acta en construcción", 200
+
 
 # --- INICIO DEL SERVIDOR ---
 if __name__ == '__main__':
