@@ -1,6 +1,7 @@
 import os
 import io
 import zipfile
+from docxtpl import DocxTemplate
 from datetime import datetime
 from flask import Flask, render_template, request, send_file
 from logic.convocatorias import ConvocatoriaLogic
@@ -104,7 +105,7 @@ def convocatoria_docente():
     try:
         sigla_fija = "PINE"
         num = request.form.get('num_convocatoria')
-        
+
         datos = {
             'num_convocatoria': num,
             'periodo': request.form.get('periodo'),
@@ -139,11 +140,11 @@ def generar_pat_zip():
     try:
         m_op = request.form.get('maestria_opcion')
         metod_op = request.form.get('metodologia_opcion')
-        
+
         # Procesamiento de fechas
         fecha_s = request.form.get('fecha_sesion')
         fecha_d = request.form.get('fecha_designacion')
-        
+
         # Formateamos para que la lógica lo entienda
         fecha_final_obj = datetime.strptime(fecha_s, '%Y-%m-%d')
         fecha_desig_str = datetime.strptime(fecha_d, '%Y-%m-%d').strftime('%d/%m/%Y')
@@ -170,7 +171,7 @@ def generar_pat_zip():
                 (generar_documento_pat05(datos), "PAT_005_Asistencia.docx"),
                 (generar_documento_pat06(datos), "PAT_006_Informe.docx"),
             ]
-            
+
             for buffer, name in pats:
                 if buffer:
                     zip_file.writestr(name, buffer.getvalue())
@@ -190,7 +191,7 @@ def generate_report():
     try:
         parcial_id = request.form.get('parcial_seleccionado')
         excel_file = request.files.get('excel_file')
-        
+
         if not excel_file:
             return "No se subió ningún archivo", 400
 
@@ -204,11 +205,11 @@ def generate_report():
             "nombres_apellidos_emisor": request.form.get('nombres_apellidos_emisor'),
             "titulo_academico_cc": request.form.get('titulo_academico_cc'), # NUEVO
             "nombres_apellidos_cc": request.form.get('nombres_apellidos_cc'), # NUEVO
-            "asignatura": "ASIGNATURA" 
+            "asignatura": "ASIGNATURA"
         }
 
         logic = ReportGeneratorLogic()
-        
+
         if excel_file.filename:
             datos["asignatura"] = logic._extract_subject_from_filename(excel_file.filename)
 
@@ -225,10 +226,38 @@ def generate_report():
     except Exception as e:
         return f"Error en Informe: {str(e)}", 500
 
-@app.route('/generar_acta', methods=['POST'])
-def generar_acta():
-    # Aquí irá la lógica similar a las demás para llenar el Word
-    return "Funcionalidad de Acta en construcción", 200
+@app.route('/generar_acta_tecnica', methods=['POST'])
+def generar_acta_tecnica():
+    try:
+        datos = {
+            "num_acta": request.form.get('num_acta'),
+            "fecha": request.form.get('fecha_acta'),
+            "asunto": request.form.get('asunto'),
+            "antecedentes": request.form.get('antecedentes'),
+            "objetivos": request.form.get('objetivos'),
+            "desarrollo": request.form.get('desarrollo'),
+            "conclusiones": request.form.get('conclusiones'),
+            "recomendaciones": request.form.get('recomendaciones'),
+            "nombre_emisor": request.form.get('nombre_emisor'),
+            "cargo_emisor": request.form.get('cargo_emisor')
+        }
+
+        template_path = os.path.join(app.root_path, 'resources', 'Acta_Tecnica.docx')
+        doc = DocxTemplate(template_path)
+        doc.render(datos)
+
+        buffer = io.BytesIO()
+        doc.save(buffer)
+        buffer.seek(0)
+
+        return send_file(
+            buffer,
+            as_attachment=True,
+            download_name=f"Acta_Tecnica_{datos['num_acta']}.docx",
+            mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        )
+    except Exception as e:
+        return f"Error en Acta Técnica: {str(e)}", 500
 
 
 # --- INICIO DEL SERVIDOR ---
